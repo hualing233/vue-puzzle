@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive } from 'vue';
 import misaka from '../assets/misaka.png';
+import img1 from '../assets/img1.jpg';
+import img2 from '../assets/img2.jpg';
 
-const puzzleBlockW = ref(10);
-const puzzleBlockH = ref(10);
+const puzzleCount = ref(3);
+const puzzleBlockW = ref(30);
+const puzzleBlockH = ref(30);
 const puzzleRef = ref<any[]>([]);
 const selectSwapIndex = ref<number[]>([]);
+const imgList = ref<any[]>([misaka, img1, img2]);
+const currentImg = ref(misaka);
 
 const setRef = (el: any) => {
   puzzleRef.value.push(el);
@@ -92,25 +97,39 @@ const generateMatrix = (n: number, dx: number, dy: number) => {
   return arr;
 };
 
-matrixArr = generateMatrix(3, puzzleBlockW.value, puzzleBlockH.value);
-console.log('矩阵数组', matrixArr);
+const selectImg = (img: string) => {
+  currentImg.value = img;
+  initPuzzle();
+}
 
-onMounted(() => {
-  console.log('组件渲染', puzzleRef.value);
+const initPuzzle = () => {
+  matrixArr = generateMatrix(puzzleCount.value, puzzleBlockW.value, puzzleBlockH.value);
   setTimeout(() => {
     shuffle(puzzleRef.value, matrixArr);
   }, 2000);
-});
+}
+
+initPuzzle();
+
+// onMounted(() => {
+//   initPuzzle();
+// });
 </script>
 
 <template>
   <div class="puzzle-play">
-    <h1>游戏页面</h1>
+    <div class="select-img">
+      <h1>请选择图片开始拼图</h1>
+      <div class="img-list">
+        <div @click="selectImg(item)" class="img-item" :style="`background-image: url(${item})`" v-for="(item, index) in imgList" :key="index" ></div>
+      </div>
+    </div>
+    <h1>开始拼图</h1>
     <h2>点击两个拼图块进行移动</h2>
     <div class="puzzle-panle">
       <div
         :ref="setRef"
-        :style="`width: ${puzzleBlockW}vw; height: ${puzzleBlockH}vw; background-image: url(${misaka});
+        :style="`width: ${puzzleBlockW}vw; height: ${puzzleBlockH}vw; background-image: url(${currentImg});
         background-position: -${item.x}vw -${item.y}vw;
         transform: translate(${item.x}vw, ${item.y}vw)`"
         v-for="(item, index) in matrixArr"
@@ -125,11 +144,18 @@ onMounted(() => {
 
 <style lang="less" scoped>
 .puzzle-play {
-  background: #888;
-
+  .select-img {
+    .img-list {
+      display: flex;
+      .img-item {
+        width: 30vw;
+        height: 30vw;
+        background-size: cover;
+      }
+    }
+  }
   .puzzle-panle {
     position: relative;
-    width: 600px;
     background-color: rgb(105, 104, 142);
   }
 
