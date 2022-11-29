@@ -99,7 +99,16 @@ const generateMatrix = (n: number, dx: number, dy: number) => {
 
 const selectImg = (img: string) => {
   currentImg.value = img;
+  scaleImage(img)
   initPuzzle();
+}
+
+const scaleImage = (imgSrc: string) => {
+  let img = new Image();
+  img.src = imgSrc;
+  img.onload = function() {
+    console.log('加载图片宽高', img.width, img.height);
+  }
 }
 
 const initPuzzle = () => {
