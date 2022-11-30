@@ -12,6 +12,10 @@ const routes = [
     path: '/play',
     component: Play,
   },
+  {
+    path: '/',
+    component: Play,
+  },
 ];
 
 const router = createRouter({
