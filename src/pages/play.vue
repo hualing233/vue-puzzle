@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
-import misaka from '../assets/misaka.png';
+import misaka from '../assets/misaka2.png';
 import img1 from '../assets/img1.jpg';
 import img2 from '../assets/img2.jpg';
 
+// 拼图单边块数
 const puzzleCount = ref(3);
+// 块宽度
 const puzzleBlockW = ref(30);
+// 块高度
 const puzzleBlockH = ref(30);
 const puzzleRef = ref<any[]>([]);
+// 选择移动的图块index
 const selectSwapIndex = ref<number[]>([]);
+// 图片列表
 const imgList = ref<any[]>([misaka, img1, img2]);
+// 当前拼图图片
 const currentImg = ref(misaka);
 
 const setRef = (el: any) => {
@@ -30,7 +36,9 @@ const shuffle = (els: Array<HTMLElement>, arr: Array<any>) => {
   upsetArr(arr);
   for (let i = 0; i < arr.length; i++) {
     const el = els[i];
-    el.style.transform = `translate(${arr[i].x}vw, ${arr[i].y}vw)`;
+    if (el) {
+      el.style.transform = `translate(${arr[i].x}vw, ${arr[i].y}vw)`;
+    }
   }
 };
 
@@ -97,40 +105,81 @@ const generateMatrix = (n: number, dx: number, dy: number) => {
   return arr;
 };
 
-const selectImg = (img: string) => {
-  currentImg.value = img;
-  scaleImage(img)
-  initPuzzle();
-}
+const selectImg = async (img: string) => {
+  const newImg = await scaleImage(img);
+  if (newImg) {
+    currentImg.value = newImg as string;
+    puzzleStart();
+  }
+};
 
 const scaleImage = (imgSrc: string) => {
   let img = new Image();
   img.src = imgSrc;
-  img.onload = function() {
-    console.log('加载图片宽高', img.width, img.height);
-  }
-}
+  return new Promise((resvole) => {
+    img.onload = function () {
+      console.log('加载图片宽高', img.width, img.height);
+      const canvas = document.createElement('canvas');
+      const rate = window.screen.width / 100;
+      console.log('rate', rate);
+      canvas.height = canvas.width =
+        puzzleBlockW.value * puzzleCount.value * rate;
+      canvas
+        .getContext('2d')
+        ?.drawImage(
+          img,
+          0,
+          0,
+          canvas.width,
+          (img.height * canvas.width) / img.width,
+        );
+      const imgBase64 = canvas.toDataURL('image/jpeg');
+      resvole(imgBase64);
+    };
+  });
+};
 
-const initPuzzle = () => {
-  matrixArr = generateMatrix(puzzleCount.value, puzzleBlockW.value, puzzleBlockH.value);
+// 拼图初始化
+const initPuzzle = async () => {
+  matrixArr = generateMatrix(
+    puzzleCount.value,
+    puzzleBlockW.value,
+    puzzleBlockH.value,
+  );
+  const newImg = await scaleImage(misaka);
+  if (newImg) {
+    currentImg.value = newImg as string;
+  }
+  puzzleStart();
+};
+
+// 拼图开始
+const puzzleStart = () => {
+  matrixArr = generateMatrix(
+    puzzleCount.value,
+    puzzleBlockW.value,
+    puzzleBlockH.value,
+  );
   setTimeout(() => {
     shuffle(puzzleRef.value, matrixArr);
-  }, 2000);
-}
+  }, 1200);
+};
 
 initPuzzle();
-
-// onMounted(() => {
-//   initPuzzle();
-// });
 </script>
 
 <template>
   <div class="puzzle-play">
     <div class="select-img">
-      <h1>请选择图片开始拼图</h1>
+      <h2>请选择图片开始拼图</h2>
       <div class="img-list">
-        <div @click="selectImg(item)" class="img-item" :style="`background-image: url(${item})`" v-for="(item, index) in imgList" :key="index" ></div>
+        <div
+          @click="selectImg(item)"
+          class="img-item"
+          :style="`background-image: url(${item})`"
+          v-for="(item, index) in imgList"
+          :key="index"
+        ></div>
       </div>
     </div>
     <h1>开始拼图</h1>
