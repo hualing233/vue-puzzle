@@ -12,7 +12,7 @@ export default defineConfig(({ command }) => {
     };
   } else {
     return {
-      base: '/vue-puzzle/',
+      base: '/',
       plugins: [vue()],
     };
   }
