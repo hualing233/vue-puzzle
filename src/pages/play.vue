@@ -3,6 +3,8 @@ import { ref, reactive } from 'vue';
 import misaka from '../assets/misaka2.png';
 import img1 from '../assets/img1.jpg';
 import img2 from '../assets/img2.jpg';
+import 'element-plus/es/components/message/style/css';
+import { ElMessage } from 'element-plus';
 
 // 拼图单边块数
 const puzzleCount = ref(3);
@@ -74,7 +76,11 @@ const movePuzzle = (puzzleIndex: number) => {
 
     setTimeout(() => {
       if (isSuccess) {
-        alert('拼图完成！');
+        ElMessage({
+          message: '拼图完成！',
+          type: 'success',
+          offset: 100
+        });
       }
     }, 500);
   }
