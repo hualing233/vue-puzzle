@@ -4,7 +4,7 @@ import misaka from '../assets/misaka2.png';
 import img1 from '../assets/img1.jpg';
 import img2 from '../assets/img2.jpg';
 import 'element-plus/es/components/message/style/css';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElButton } from 'element-plus';
 
 // 拼图单边块数
 const puzzleCount = ref(3);
@@ -79,7 +79,7 @@ const movePuzzle = (puzzleIndex: number) => {
         ElMessage({
           message: '拼图完成！',
           type: 'success',
-          offset: 100
+          offset: 100,
         });
       }
     }, 500);
@@ -190,7 +190,10 @@ initPuzzle();
     </div>
     <h1>开始拼图</h1>
     <h2>点击两个拼图块进行移动</h2>
-    <div class="puzzle-panle">
+    <div
+      class="puzzle-panle"
+      :style="`height: ${puzzleBlockH * puzzleCount}vw;`"
+    >
       <div
         :ref="setRef"
         :style="`width: ${puzzleBlockW}vw; height: ${puzzleBlockH}vw; background-image: url(${currentImg});
@@ -203,6 +206,7 @@ initPuzzle();
         @click="movePuzzle(Number(item.index))"
       ></div>
     </div>
+    <ElButton class="sort-btn" @click="puzzleStart">重新排序</ElButton>
   </div>
 </template>
 
@@ -222,11 +226,17 @@ initPuzzle();
     position: relative;
     background-color: rgb(105, 104, 142);
   }
+  .sort-btn {
+    margin-top: 20px;
+  }
 
   .puzzle-item {
     position: absolute;
     transition: all 0.3s;
     background-color: bisque;
+    &:active {
+      filter: drop-shadow(2px 4px 6px black);
+    }
   }
 }
 </style>
