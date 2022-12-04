@@ -5,6 +5,7 @@ import img1 from '../assets/img1.jpg';
 import img2 from '../assets/img2.jpg';
 import 'element-plus/es/components/message/style/css';
 import { ElMessage, ElButton } from 'element-plus';
+import 'element-plus/es/components/button/style/css'
 
 const easyConfig = {
   count: 3, // 拼图单边块数
@@ -126,10 +127,6 @@ const switchMode = (mode: IMode) => {
   nextTick(() => {
     puzzleStart();
   })
-  // puzzleStart();
-  // setTimeout(() => {
-  //   puzzleStart();
-  // }, 2000);
 };
 
 // 生成n维矩阵坐标
@@ -181,11 +178,6 @@ const scaleImage = (imgSrc: string) => {
 
 // 拼图初始化
 const initPuzzle = async () => {
-  // matrixArr.list = generateMatrix(
-  //   puzzleConfig.count,
-  //   puzzleConfig.blockW,
-  //   puzzleConfig.blockH,
-  // );
   const newImg = await scaleImage(misaka);
   if (newImg) {
     currentImg.value = newImg as string;
@@ -234,8 +226,8 @@ onBeforeUpdate(() => {
     </div>
     <h1>开始拼图</h1>
     <h2>点击两个拼图块进行移动</h2>
-    <ElButton @click="switchMode('easy')">简单难度</ElButton>
-    <ElButton @click="switchMode('hard')">困难难度</ElButton>
+    <ElButton color="#67c23a" @click="switchMode('easy')">简单难度</ElButton>
+    <ElButton color="#f1902e" @click="switchMode('hard')">困难难度</ElButton>
     <div
       class="puzzle-panle"
       :style="`height: ${puzzleConfig.blockH * puzzleConfig.count}vw;`"
@@ -252,7 +244,7 @@ onBeforeUpdate(() => {
         @click="movePuzzle(Number(item.index))"
       ></div>
     </div>
-    <ElButton class="sort-btn" @click="puzzleStart">重新排序</ElButton>
+    <ElButton color="#409eff" class="sort-btn" @click="puzzleStart">重新排序</ElButton>
   </div>
 </template>
 
