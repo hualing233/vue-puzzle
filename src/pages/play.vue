@@ -3,9 +3,10 @@ import { ref, reactive, nextTick, onBeforeUpdate } from 'vue';
 import misaka from '../assets/misaka2.png';
 import img1 from '../assets/img1.jpg';
 import img2 from '../assets/img2.jpg';
-import 'element-plus/es/components/message/style/css';
-import { ElMessage, ElButton } from 'element-plus';
-import 'element-plus/es/components/button/style/css'
+import 'element-plus/es/components/message-box/style/css';
+import { ElMessageBox, ElButton } from 'element-plus';
+import 'element-plus/es/components/button/style/css';
+import { formatSecond } from '../utils';
 
 const easyConfig = {
   count: 3, // 拼图单边块数
@@ -30,6 +31,8 @@ const selectSwapIndex = ref<number[]>([]);
 const imgList = ref<any[]>([misaka, img1, img2]);
 // 当前拼图图片
 const currentImg = ref(misaka);
+// 游戏开始时间
+let startTime = 0;
 
 const setRef = (el: any) => {
   puzzleRef.push(el);
@@ -82,6 +85,13 @@ const swap = (
 // 移动拼图
 const movePuzzle = (puzzleIndex: number) => {
   console.log('移动拼图', puzzleIndex);
+  if (
+    selectSwapIndex.value.length === 1 &&
+    selectSwapIndex.value[0] === puzzleIndex
+  ) {
+    return;
+  }
+  gameStart();
   selectSwapIndex.value.push(puzzleIndex);
   if (selectSwapIndex.value && selectSwapIndex.value.length === 2) {
     const [indexA, indexB] = selectSwapIndex.value;
@@ -90,15 +100,15 @@ const movePuzzle = (puzzleIndex: number) => {
 
     const isSuccess = checkSuccess(checkList.list);
 
-    setTimeout(() => {
-      if (isSuccess) {
-        ElMessage({
-          message: '拼图完成！',
-          type: 'success',
-          offset: 100,
+    if (isSuccess) {
+      const doneTime = getGameDoneTime();
+      setTimeout(() => {
+        ElMessageBox.alert(`耗时：${doneTime}`, '拼图完成!', {
+          appendTo: '#app',
+          confirmButtonText: 'ok',
         });
-      }
-    }, 500);
+      }, 500);
+    }
   }
 };
 
@@ -120,13 +130,13 @@ const switchMode = (mode: IMode) => {
     easy: easyConfig,
     hard: hardConfig,
   };
-  console.log('选择配置', mode, map[mode])
+  console.log('选择配置', mode, map[mode]);
   Object.assign(puzzleConfig, map[mode]);
   matrixArr.list = [];
   checkList.list = [];
   nextTick(() => {
     puzzleStart();
-  })
+  });
 };
 
 // 生成n维矩阵坐标
@@ -176,6 +186,24 @@ const scaleImage = (imgSrc: string) => {
   });
 };
 
+// 游戏开始时间
+const gameStart = () => {
+  if (startTime === 0) {
+    startTime = +new Date();
+    console.log('开始时间', startTime);
+  }
+};
+
+// 游戏结束时间
+const getGameDoneTime = () => {
+  const endTime = +new Date();
+  console.log('结束时间', endTime);
+  let doneTime = (endTime - startTime) / 1000;
+  let doneTimeStr = formatSecond(doneTime);
+  startTime = 0;
+  return doneTimeStr;
+};
+
 // 拼图初始化
 const initPuzzle = async () => {
   const newImg = await scaleImage(misaka);
@@ -206,7 +234,7 @@ const puzzleStart = () => {
 initPuzzle();
 
 onBeforeUpdate(() => {
-  puzzleRef = []
+  puzzleRef = [];
 });
 </script>
 
@@ -244,12 +272,15 @@ onBeforeUpdate(() => {
         @click="movePuzzle(Number(item.index))"
       ></div>
     </div>
-    <ElButton color="#409eff" class="sort-btn" @click="puzzleStart">重新排序</ElButton>
+    <ElButton color="#409eff" class="sort-btn" @click="puzzleStart"
+      >重新排序</ElButton
+    >
   </div>
 </template>
 
 <style lang="less" scoped>
 .puzzle-play {
+  overflow: hidden;
   .select-img {
     .img-list {
       display: flex;
@@ -274,6 +305,7 @@ onBeforeUpdate(() => {
     transition: all 0.3s;
     background-color: bisque;
     &:active {
+      border: 6px solid rgb(234, 105, 41);
       filter: drop-shadow(2px 4px 6px black);
     }
   }
